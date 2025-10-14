@@ -1,6 +1,6 @@
 module github.com/netcracker/qubership-core-lib-go-dbaas-clickhouse-client/v2
 
-go 1.25.1
+go 1.25.3
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.40.3
