@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
-	"github.com/docker/go-connections/nat"
 	dbaasbase "github.com/netcracker/qubership-core-lib-go-dbaas-base-client/v3"
 	"github.com/netcracker/qubership-core-lib-go-dbaas-base-client/v3/cache"
 	dbaasbasemodel "github.com/netcracker/qubership-core-lib-go-dbaas-base-client/v3/model"
@@ -58,7 +57,7 @@ func (suite *DatabaseTestSuite) TestChClient_GetConnection_ConnectionError() {
 
 func (suite *DatabaseTestSuite) TestChClient_GetConnection_NewClient() {
 	ctx := context.Background()
-	port, _ := nat.NewPort("tcp", clickhousePort)
+	port := clickhousePort
 	container := prepareTestContainer(suite.T(), ctx, port)
 	defer func() {
 		err := container.Terminate(ctx)
@@ -93,7 +92,7 @@ func (suite *DatabaseTestSuite) TestChClient_GetConnection_NewClient() {
 
 func (suite *DatabaseTestSuite) TestChClient_GetConnection_ClientFromCache() {
 	ctx := context.Background()
-	port, _ := nat.NewPort("tcp", clickhousePort)
+	port := clickhousePort
 	container := prepareTestContainer(suite.T(), ctx, port)
 	defer func() {
 		err := container.Terminate(ctx)
@@ -140,7 +139,7 @@ func (suite *DatabaseTestSuite) TestChClient_GetConnection_ClientFromCache() {
 
 func (suite *DatabaseTestSuite) TestChClient_GetConnection_UpdatePassword() {
 	ctx := context.Background()
-	port, _ := nat.NewPort("tcp", clickhousePort)
+	port := clickhousePort
 	container := prepareTestContainer(suite.T(), ctx, port)
 	defer func() {
 		err := container.Terminate(ctx)
@@ -200,7 +199,7 @@ func (suite *DatabaseTestSuite) checkConnectionIsWorking(conn driver.Conn, ctx c
 
 func (suite *DatabaseTestSuite) TestReconnectOnTcpTearDown() {
 	ctx := context.Background()
-	port, _ := nat.NewPort("tcp", clickhousePort)
+	port := clickhousePort
 	container := prepareTestContainer(suite.T(), ctx, port)
 	defer func() {
 		err := container.Terminate(ctx)
@@ -261,10 +260,10 @@ func clickhouseDbaasResponseHandler(address, password string) []byte {
 	return jsonResponse
 }
 
-func prepareTestContainer(t *testing.T, ctx context.Context, port nat.Port) testcontainers.Container {
+func prepareTestContainer(t *testing.T, ctx context.Context, port string) testcontainers.Container {
 	req := testcontainers.ContainerRequest{
 		Image:        "clickhouse/clickhouse-server:24.1.8.22",
-		ExposedPorts: []string{port.Port(), "8123/tcp"},
+		ExposedPorts: []string{port, "8123/tcp"},
 		WaitingFor: wait.ForAll(
 			wait.ForHTTP("/ping").WithPort("8123/tcp").WithStatusCodeMatcher(
 				func(status int) bool {
